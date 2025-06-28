@@ -72,9 +72,6 @@ class Department(models.Model):
         return self.name
 
 class ChecklistItem(models.Model):
-    """
-    Represents a single task in the machine preparation checklist.
-    """
     name = models.CharField(max_length=255, unique=True, help_text="Name of the checklist item (e.g., 'Install Antivirus')")
     description = models.TextField(blank=True, help_text="Detailed description of the checklist item.")
     order = models.IntegerField(default=0, help_text="Order in which this item should appear.")
@@ -100,6 +97,8 @@ class Machine(models.Model):
         default='PENDING',
         help_text="Overall preparation status of the machine."
     )
+    assigned_user = models.CharField(max_length=255, blank=True, null=True)
+    assignment_date = models.DateTimeField(blank=True, null=True) 
     is_lead = models.BooleanField(default=False, help_text="Is this machine designated as a 'lead' for a task or department?")
     last_checkin = models.DateTimeField(auto_now=True, help_text="Timestamp of the last check-in from the machine agent.")
     department = models.ForeignKey(
@@ -131,6 +130,42 @@ class Machine(models.Model):
 
     def __str__(self):
         return self.hostname
+    
+    def update_overall_status(self):
+        # This is a simplified logic. You'd likely check all required checklist items
+        # and productivity tools from the department.
+        total_checklist_items = ChecklistItem.objects.count()
+        completed_checklist_items = self.machinecheckliststatus_set.filter(status='COMPLETED').count()
+
+        if completed_checklist_items == total_checklist_items and self.department:
+            # Also check if all required tools are 'installed' if you track that
+            self.overall_status = 'READY'
+        elif completed_checklist_items > 0 or self.department:
+            self.overall_status = 'IN_PROGRESS'
+        else:
+            self.overall_status = 'PENDING'
+        self.save()
+
+    # Override save method to capture assignment_date when department is set for the first time
+    def save(self, *args, **kwargs):
+        # Check if department is being assigned or changed from None to a value
+        # and if assignment_date is not already set.
+        if self.department and not self.assignment_date and not self._state.adding:
+            # If the instance already exists in the DB, fetch its current state
+            # to compare the department field.
+            try:
+                original_instance = Machine.objects.get(pk=self.pk)
+                if original_instance.department is None and self.department is not None:
+                    self.assignment_date = timezone.now()
+            except Machine.DoesNotExist:
+                # This case handles a newly created instance that also gets a department assigned
+                # in the same save operation.
+                if self.department is not None:
+                    self.assignment_date = timezone.now()
+        elif self._state.adding and self.department: # For new machines created with a department
+             self.assignment_date = timezone.now()
+
+        super().save(*args, **kwargs)
 
 class MachineChecklistStatus(models.Model):
     """

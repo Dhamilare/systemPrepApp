@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Checklist Items - System Prep{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col s12">
+        <h3 class="center-align purple-text text-darken-3">Checklist Item Catalog</h3>
+        <p class="center-align grey-text text-darken-1">Browse and understand the various tasks and items required for machine preparation.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for item in checklist_items %}
+    <div class="col s12 m6 l4"> {# Responsive grid columns #}
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title purple-text text-darken-3">{{ item.name }}</span>
+
+                {# Description Section #}
+                <p class="grey-text text-darken-1">
+                    <i class="material-icons left">info_outline</i>
+                    {% if item.description %}
+                        {{ item.description|truncatechars:100 }}
+                    {% else %}
+                        No description available.
+                    {% endif %}
+                </p>
+
+                <div class="divider" style="margin: 15px 0;"></div>
+
+                {# Order Section #}
+                <p class="grey-text">
+                    <i class="material-icons left">format_list_numbered</i> {# Icon for order #}
+                    Order: {{ item.order }}
+                </p>
+
+                {# Critical Status Section #}
+                <p class="grey-text">
+                    <i class="material-icons left">
+                        {% if item.is_critical %}
+                            warning
+                        {% else %}
+                            check_circle_outline
+                        {% endif %}
+                    </i>
+                    Critical Item:
+                    {% if item.is_critical %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col s12">
+        <div class="card-panel grey lighten-4 center-align">
+            <i class="material-icons large grey-text">assignment_turned_in</i>
+            <h5 class="grey-text">No checklist items found.</h5>
+            <p class="grey-text">There are no tasks or items configured for machine checklists.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Tooltips
+        var tooltippedElems = document.querySelectorAll('.tooltipped');
+        M.Tooltip.init(tooltippedElems);
+    });
+</script>
+{% endblock %}

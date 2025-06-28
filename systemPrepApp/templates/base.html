@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}System Prep App{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="custom-purple-dark">
+            <div class="nav-wrapper container">
+                <!-- <a href="{% url 'dashboard' %}" class="brand-logo left">System Prep Dashboard</a> -->
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="{% url 'dashboard' %}"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+                    <li><a href="{% url 'departments_list' %}"><i class="material-icons left">business</i>Departments</a></li>
+                    <li><a href="{% url 'checklist_items_list' %}"><i class="material-icons left">checklist</i>Checklist</a></li>
+                    <li><a href="#onboardInstructionsModal" class="modal-trigger"><i class="material-icons left">cloud_download</i>Onboard Devices</a></li>
+                    {% if user.is_authenticated %}
+                        <li>
+                            <form id="logout-form-desktop" action="{% url 'logout' %}" method="post" style="display: none;">
+                                {% csrf_token %}
+                            </form>
+                            <a href="#" onclick="document.getElementById('logout-form-desktop').submit();" class="btn btn-logout-custom">
+                                <i class="material-icons left">power_settings_new</i>LOGOUT
+                            </a>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}"><i class="material-icons left">person</i>Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+        <ul class="sidenav" id="mobile-demo">
+            <li><a href="{% url 'dashboard' %}"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+            <li><a href="{% url 'departments_list' %}"><i class="material-icons left">business</i>Departments</a></li>
+            <li><a href="{% url 'checklist_items_list' %}"><i class="material-icons left">checklist</i>Checklist</a></li>
+            <li><a href="#onboardInstructionsModal" class="modal-trigger"><i class="material-icons left">cloud_download</i>Onboard Devices</a></li>
+            {% if user.is_authenticated %}
+                <li>
+                    <form id="logout-form-mobile" action="{% url 'logout' %}" method="post" style="display: none;">
+                        {% csrf_token %}
+                    </form>
+                    <a href="#" onclick="document.getElementById('logout-form-mobile').submit();" class="btn btn-logout-custom">
+                        <i class="material-icons left">power_settings_new</i>LOGOUT
+                    </a>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}"><i class="material-icons left">person</i>Login</a></li>
+            {% endif %}
+        </ul>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+
+        {# Onboarding Instructions Modal #}
+        <div id="onboardInstructionsModal" class="modal">
+            <div class="modal-content">
+                <h4>Onboarding Device Instructions</h4>
+                <p>Follow these steps to onboard a new machine to the System Prep Dashboard:</p>
+                <ol>
+                    <li>
+                        <strong>Download the Onboarding Agent:</strong> The executable file (`onboarding_agent.exe`) is provided below.
+                    </li>
+                    <li>
+                        <strong>Transfer the File:</strong> Copy the downloaded `onboarding_agent.exe` file to the machine you wish to onboard. You can use a USB drive, network share, or any other preferred method.
+                    </li>
+                    <li>
+                        <strong>Run the Agent:</strong> On the target machine, simply **double-click** the `onboarding_agent.exe` file.
+                        <br>
+                        <em>Note:</em> You may see a Windows SmartScreen or antivirus warning. You will need to allow the application to run.
+                    </li>
+                    <li>
+                        <strong>Verification:</strong> Once the agent runs, it will collect basic system information and send it to the System Prep Dashboard. The machine should then appear in the "Machines Overview" table shortly.
+                    </li>
+                    <li>
+                        <strong>Initial Setup:</strong> After the machine appears, you can assign its department, add optional tools, and track its preparation status directly from the dashboard.
+                    </li>
+                </ol>
+                <a href="{% url 'download_agent_exe' %}" class="waves-effect waves-light btn blue darken-1 tooltipped" data-position="bottom" data-tooltip="Download the executable file to onboard devices">
+                    <i class="material-icons left">file_download</i> Download Agent
+                </a>
+                <p class="grey-text" style="margin-top: 15px;">For any issues, please contact IT support.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
+        </div>
+        {# END Onboarding Instructions Modal #}
+
+    </main>
+
+    <footer class="page-footer custom-purple-darker">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">SystemPrep</h5>
+                    <p class="grey-text text-lighten-4">Efficient machine preparation and management.</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Links</h5>
+                    <ul>
+                        <li><a class="grey-text text-lighten-3" href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li><a class="grey-text text-lighten-3" href="{% url 'departments_list' %}">Departments</a></li>
+                        <li><a class="grey-text text-lighten-3" href="{% url 'checklist_items_list' %}">Checklist Items</a></li>
+                        <li><a class="grey-text text-lighten-3" href="{% url 'download_agent_exe' %}">Onboard Devices</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+            &copy; {{ current_time|date:"Y" }} SystemPrep
+            <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(elems);
+
+            // Initialize all modals
+            var modalElems = document.querySelectorAll('.modal');
+            M.Modal.init(modalElems);
+
+            // Initialize all tooltips
+            var tooltippedElems = document.querySelectorAll('.tooltipped');
+            M.Tooltip.init(tooltippedElems);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Departments - System Prep{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col s12">
+        <h3 class="center-align purple-text text-darken-3">Department Overview</h3>
+        <p class="center-align grey-text text-darken-1">View the list of departments within your organization.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for department in departments %}
+    <div class="col s12 m6 l4"> {# Responsive grid columns #}
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title purple-text text-darken-3">{{ department.name }}</span>
+
+                {# Description Section - Aligned with icon #}
+                <p class="grey-text text-darken-1">
+                    <i class="material-icons left">info_outline</i>
+                    {% if department.description %}
+                        {{ department.description|truncatechars:100 }}
+                    {% else %}
+                        No description available.
+                    {% endif %}
+                </p>
+
+                <div class="divider" style="margin: 15px 0;"></div>
+                <p class="grey-text">
+                    <i class="material-icons left">devices</i>
+                    Machines: {{ department.machines_count }}
+                </p>
+
+                {# Productivity Tools Section - Aligned with icon, chips flow naturally #}
+                <p class="grey-text">
+                    <i class="material-icons left">extension</i>
+                    Productivity Tools:
+                    {% if department.productivity_tools.all %}
+                        {% for tool in department.productivity_tools.all %}
+                            <div class="chip purple lighten-5 purple-text text-darken-3">
+                                {{ tool.name }}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        None
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col s12">
+        <div class="card-panel grey lighten-4 center-align">
+            <i class="material-icons large grey-text">business</i>
+            <h5 class="grey-text">No departments found.</h5>
+            <p class="grey-text">There are no departments currently set up in the system.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Tooltips
+        var tooltippedElems = document.querySelectorAll('.tooltipped');
+        M.Tooltip.init(tooltippedElems);
+    });
+</script>
+{% endblock %}

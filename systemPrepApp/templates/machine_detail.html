@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ machine.hostname }} Details - System Prep{% endblock %}
+{% block content %}
+    <h3>Machine Details: {{ machine.hostname }}</h3>
+    <div class="card">
+        <div class="card-content">
+            <p><strong>Hostname:</strong> {{ machine.hostname }}</p>
+            <p><strong>IP Address:</strong> {{ machine.ip_address|default:"N/A" }}</p>
+            <p><strong>Department:</strong> {{ machine.department.name|default:"N/A" }}</p>
+            <p><strong>Assigned User:</strong> {{ machine.assigned_user|default:"N/A" }}</p>
+            <p><strong>Assignment Date:</strong> {{ machine.assignment_date|date:"M d, Y"|default:"N/A" }}</p>
+            <p><strong>Overall Status:</strong> {{ machine.get_overall_status_display }}</p>
+            <h5>Checklist Statuses</h5>
+            <ul class="collection">
+                {% for item_status in machine.machinecheckliststatus_set.all %}
+                    <li class="collection-item">
+                        <span>{{ item_status.checklist_item.name }}: {{ item_status.get_status_display }}</span>
+                        <p class="grey-text text-darken-1">{{ item_status.notes|default:"No notes." }}</p>
+                    </li>
+                {% empty %}
+                    <li class="collection-item">No checklist items for this machine.</li>
+                {% endfor %}
+            </ul>
+
+            <h5>Assigned Optional Tools</h5>
+            <ul class="collection">
+                {% for tool in machine.optional_tools.all %}
+                    <li class="collection-item">{{ tool.name }}</li>
+                {% empty %}
+                    <li class="collection-item">No optional tools assigned.</li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        <div class="card-action">
+            <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+        </div>
+    </div>
+{% endblock %}

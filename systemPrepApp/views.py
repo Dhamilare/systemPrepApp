@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.conf import settings
 from wsgiref.util import FileWrapper
-from django.views import View
+from django.db.models import Count
 import os
 from rest_framework import status, generics
 from rest_framework.response import Response
@@ -13,25 +13,55 @@ from rest_framework_api_key.permissions import HasAPIKey
 from django.db.models import Prefetch
 from .models import *
 from .serializers import *
+from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-
+from django.views.generic import ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Frontend Dashboard View
-@method_decorator(login_required, name='dispatch')
-class DashboardView(View):
-    def get(self, request):
-        machines = Machine.objects.select_related('department').order_by('hostname')
-        departments = Department.objects.prefetch_related(
+class DashboardView(LoginRequiredMixin, ListView):
+    model = Machine
+    template_name = 'dashboard.html'
+    context_object_name = 'machines'
+
+    def get_queryset(self):
+        return Machine.objects.select_related('department').order_by('hostname')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['departments'] = Department.objects.prefetch_related(
             Prefetch('productivity_tools', queryset=ProductivityTool.objects.order_by('name'))
         ).order_by('name')
 
-        context = {
-            'machines': machines,
-            'departments': departments,
-            'current_time': timezone.now()
-        }
-        return render(request, 'dashboard.html', context)
+        context['all_productivity_tools'] = ProductivityTool.objects.all().order_by('name')
+        context['all_checklist_items'] = ChecklistItem.objects.all().order_by('name')
+        context['current_time'] = timezone.now() 
+
+        return context
+    
+@api_view(['POST'])
+def assign_department(request, machine_id):
+    machine = get_object_or_404(Machine, id=machine_id)
+    new_department_id = request.data.get('department_id')
+
+    if machine.department is not None:
+        if new_department_id is None or str(machine.department.id) != str(new_department_id):
+            return Response(
+                {"detail": "This machine is already assigned to a department and cannot be reassigned."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+    # Resolve the new department object
+    if new_department_id:
+        department = get_object_or_404(Department, id=new_department_id)
+    else:
+        department = None
+
+    machine.department = department
+    machine.save()
+
+    return Response(MachineSerializer(machine).data, status=status.HTTP_200_OK)
 
 
 # Agent API: Register/Check-in
@@ -146,6 +176,7 @@ class AgentMachineTasksView(generics.RetrieveAPIView):
 
 
 #Download Agent EXE
+@login_required
 def download_agent_exe(request):
     exe_path = os.path.join(settings.BASE_DIR, 'systemPrepApp', 'dist', 'client_agent.exe')
     if os.path.exists(exe_path):
@@ -155,3 +186,41 @@ def download_agent_exe(request):
         return response
 
     return HttpResponse("Agent executable not found.", status=404)
+
+
+class DepartmentsListView(LoginRequiredMixin, ListView):
+    model = Department
+    template_name = 'departments_list.html' 
+    context_object_name = 'departments'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        queryset = queryset.annotate(
+            machines_count=Count('machines', distinct=True)
+        )
+
+        queryset = queryset.prefetch_related('productivity_tools')
+
+        return queryset
+
+
+class ChecklistItemsListView(LoginRequiredMixin, ListView):
+    model = ChecklistItem
+    template_name = 'checklist_items_list.html'
+    context_object_name = 'checklist_items'
+    paginate_by = 10 
+
+    def get_queryset(self):
+        return super().get_queryset()
+    
+
+class MachineDetailView(LoginRequiredMixin, DetailView):
+    model = Machine 
+    template_name = 'machine_detail.html' 
+    context_object_name = 'machine'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context

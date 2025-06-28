@@ -1,0 +1,128 @@
+/* core/static/css/style.css */
+
+/* (Keep all your existing body, main.container, font-family, and nav .brand-logo media queries) */
+
+body {
+    font-family: "Century Gothic", sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Optional: If you want a very light purple background for the whole body */
+    /* background-color: #f5f0fb; */ /* A very light purple/lavender */
+}
+
+main.container {
+    flex-grow: 1;
+    margin-top: 20px;
+    margin-bottom: 0;
+    padding-bottom: 20px;
+}
+
+/* --- COLOR PALETTE DEFINITIONS (NEW/UPDATED) --- */
+/* Let's define some variables or direct classes for consistency */
+
+/* Based on image_166783.jpg and image_756cfa.png */
+:root {
+    --primary-purple: #673ab7; /* A deep, rich purple (Materialize Purple 700) - good for header */
+    --light-purple: #9c27b0; /* Materialize Purple A700 - bright, visible */
+    --dark-purple: #512da8; /* Materialize Deep Purple 800 - darker shade for hover/active */
+    --accent-purple: #d1c4e9; /* Materialize Purple 100 - very light purple for backgrounds/chips */
+    --footer-purple: #4527a0; /* Slightly darker for footer (Materialize Deep Purple 900) */
+    --button-red: #ef5350; /* For the LOGOUT button if you want that specific red (Materialize Red 400) */
+    --text-white: #ffffff;
+    --text-light-grey: #e0e0e0; /* light grey from original footer text */
+}
+
+
+/* --- NAVIGATION & FOOTER COLOR CHANGES --- */
+
+/* Apply the main header color */
+nav.custom-purple-dark { /* We'll use a new class for the nav */
+    background-color: var(--primary-purple) !important; /* Use !important to override Materialize default */
+}
+
+/* For the sidebar (sidenav) background, if it's not transparent */
+.sidenav {
+    background-color: var(--primary-purple) !important; /* Make sidebar match nav bar */
+}
+/* Sidenav links color */
+.sidenav li > a {
+    color: var(--text-white) !important; /* Ensure text is white on purple sidebar */
+}
+.sidenav li > a i.material-icons {
+    color: var(--text-white) !important; /* Ensure icons are white on purple sidebar */
+}
+/* Sidenav hover effect */
+.sidenav li > a:hover {
+    background-color: var(--dark-purple) !important; /* Darker purple on hover */
+}
+
+
+/* Apply the footer color */
+footer.custom-purple-darker { /* We'll use a new class for the footer */
+    background-color: var(--footer-purple) !important;
+}
+
+/* For the specific LOGOUT button style from image_756cfa.png */
+/* Assuming you will add a specific class to this button, e.g., 'btn-logout-custom' */
+.btn-logout-custom {
+    background-color: var(--button-red) !important; /* Red background */
+    color: var(--text-white) !important; /* White text */
+    /* Add any other styling like padding, border-radius etc. if needed */
+    border-radius: 5px; /* Adjust as per image */
+    padding: 0 20px; /* Adjust padding as per image */
+    height: 36px; /* Standard Materialize button height */
+    line-height: 36px;
+    display: inline-block; /* To allow padding/height to work */
+}
+.btn-logout-custom:hover {
+    background-color: #e53935 !important; /* Slightly darker red on hover */
+}
+
+
+/* --- FONT CONSISTENCY & OTHER EXISTING STYLES --- */
+/* Ensure font consistency for various elements */
+h1, h2, h3, h4, h5, h6,
+p,
+a,
+li,
+td, th,
+input, textarea, select, label, button {
+    font-family: "Century Gothic", sans-serif;
+}
+
+/* Adjust Materialize's default behavior slightly if needed, e.g., for very long nav items */
+@media screen and (min-width: 993px) { /* Applies only on desktop/larger screens */
+    nav ul.right li {
+        margin-left: 10px; /* Add a little space between list items */
+    }
+    nav ul.right li a {
+        color: var(--text-white) !important; /* Ensure nav links are white */
+    }
+    nav ul.right li a i.material-icons {
+        color: var(--text-white) !important; /* Ensure nav icons are white */
+    }
+    nav ul.right li a:hover {
+        background-color: var(--dark-purple) !important; /* Darker purple on hover */
+    }
+}
+
+/* Ensure brand-logo doesn't push sidenav trigger off-screen on mobile */
+@media screen and (max-width: 992px) {
+    nav .brand-logo {
+        max-width: calc(100% - 80px); /* Leave space for the sidenav trigger icon */
+        white-space: nowrap; /* Prevent text wrapping */
+        overflow: hidden; /* Hide overflow */
+        text-overflow: ellipsis; /* Show ellipsis if text is cut off */
+    }
+    /* On mobile, also ensure logo text is white */
+    nav .brand-logo {
+        color: var(--text-white) !important;
+    }
+    /* Sidenav trigger icon color */
+    nav .sidenav-trigger i.material-icons {
+        color: var(--text-white) !important;
+    }
+}
