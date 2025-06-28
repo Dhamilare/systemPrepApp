@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Prep Dashboard - Login</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* Custom Font: Century Gothic - Fallback to sans-serif if not available */
+        @font-face {
+            font-family: 'Century Gothic';
+            src: local('Century Gothic'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic.woff') format('woff'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Century Gothic';
+            src: local('Century Gothic Bold'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic-Bold.woff') format('woff'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Century Gothic', sans-serif; /* Apply Century Gothic */
+            background: linear-gradient(135deg, #673ab7, #4527a0); /* Deep Purple gradient */
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .login-container {
+            display: flex;
+            max-width: 900px; /* Wider container for content + form */
+            width: 90%;
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* Ensures border-radius applies to children */
+        }
+
+        .welcome-section {
+            flex: 1;
+            padding: 40px;
+            background: linear-gradient(to bottom right, #8e24aa, #5e35b1); /* Lighter purple gradient for branding */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+            position: relative; /* For the subtle pattern */
+        }
+
+        /* Subtle pattern */
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M59.27%2027.77A29.98%2029.98%200%200%201%2030%2060C13.43%2060%200%2046.57%200%2030%200%2013.43%2013.43%200%2030%200a29.98%2029.98%200%200%1%2029.27%2027.77zM30%2056a26%2026%200%201%200%200-52%2026%2026%200%200%1%200%2052z%22%20fill%3D%22%23000%22%20/%3E%3Cpath%20d%3D%22M43.7%2037.1l-1.3-1.3c-.6-.6-1.5-.6-2.1%200l-8.5%208.5-3.5-3.5c-.6-.6-1.5-.6-2.1%200l-1.3%201.3c-.6.6-.6%201.5%200%202.1l5.5%205.5c.3.3.7.4%201.1.4.4%200%20.8-.1%201.1-.4l10.5-10.5c.6-.6.6-1.5%200-2.1z%22%20fill%3D%22%23000%22%20/%3E%3C/g%3E%3C/svg%3E');
+            background-size: 60px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .welcome-section > * {
+            position: relative; /* Bring content above the pattern */
+            z-index: 1;
+        }
+
+        .welcome-section h2 {
+            font-size: 2.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .welcome-section p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .welcome-section ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .welcome-section ul li {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .welcome-section ul li .material-icons {
+            margin-right: 10px;
+            color: #fce4ec; /* Light pink for icons */
+        }
+
+        .login-form-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form-section h3 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #424242; /* Dark grey for heading */
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .input-field label {
+            color: #616161; /* Grey for labels */
+        }
+        .input-field input[type="text"]:focus + label,
+        .input-field input[type="password"]:focus + label {
+            color: #673ab7 !important; /* Deep Purple focus */
+        }
+        .input-field input[type="text"]:focus,
+        .input-field input[type="password"]:focus {
+            border-bottom: 1px solid #673ab7 !important;
+            box-shadow: 0 1px 0 0 #673ab7 !important;
+        }
+        .btn {
+            background-color: #673ab7 !important; /* Deep Purple button */
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            height: auto; /* Override materialize default height */
+        }
+        .btn:hover {
+            background-color: #5e35b1 !important; /* Darker purple on hover */
+        }
+
+        .errorlist {
+            color: #e53935; /* Red for errors */
+            list-style: none;
+            padding: 0;
+            margin-top: -15px; /* Pull up to align with fields */
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                width: 95%;
+            }
+            .welcome-section, .login-form-section {
+                padding: 30px;
+                text-align: center;
+                align-items: center;
+            }
+            .welcome-section h2 {
+                font-size: 1.8rem;
+            }
+            .welcome-section p {
+                font-size: 1rem;
+            }
+            .welcome-section ul {
+                text-align: left; /* Keep list left aligned even if parent is centered */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="welcome-section">
+            <h2>Welcome to System Prep Dashboard!</h2>
+            <p>
+                Your centralized solution for streamlined workstation setup and management.
+                This dashboard empowers you to:
+            </p>
+            <ul>
+                <li><i class="material-icons">desktop_windows</i> Monitor connected machines and their status.</li>
+                <li><i class="material-icons">business</i> Manage departments and their default toolsets.</li>
+                <li><i class="material-icons">build</i> Assign and track software/tool installations.</li>
+                <li><i class="material-icons">check_circle_outline</i> Oversee machine readiness with interactive checklists.</li>
+            </ul>
+            <p>
+                Log in to take control of your IT environment.
+            </p>
+        </div>
+        <div class="login-form-section">
+            <h3>Admin Login</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="input-field">
+                    <i class="material-icons prefix">person_outline</i>
+                    {{ form.username.errors }}
+                    <input id="id_username" type="text" name="username" class="validate">
+                    <label for="id_username">Username</label>
+                </div>
+                <div class="input-field">
+                    <i class="material-icons prefix">lock_outline</i>
+                    {{ form.password.errors }}
+                    <input id="id_password" type="password" name="password" class="validate">
+                    <label for="id_password">Password</label>
+                </div>
+                {% if form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <button class="btn waves-effect waves-light" type="submit" name="action">
+                    Log In
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        // Initialize Materialize components if any (though not strictly needed for this simple form)
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
+</body>
+</html>

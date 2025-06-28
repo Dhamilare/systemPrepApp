@@ -5,21 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Prep Dashboard</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Century Gothic';
+            src: local('Century Gothic'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic.woff') format('woff'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Century Gothic';
+            src: local('Century Gothic Bold'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic-Bold.woff') format('woff'),
+                 url('https://fonts.cdnfonts.com/s/7295/CenturyGothic-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+    </style>
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
     <style>
         body {
+            font-family: 'Century Gothic', sans-serif; /* Apply Century Gothic globally */
             background-color: #f5f5f5; /* Light grey background */
-            font-family: 'Roboto', sans-serif;
         }
         .navbar-fixed {
             margin-bottom: 30px;
         }
         .brand-logo {
-            font-weight: 500;
+            font-weight: bold; /* Make logo bold as Century Gothic regular can be thin */
+            letter-spacing: 0.5px;
         }
         .container {
             padding-top: 20px;
@@ -30,7 +50,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .card-title {
-            font-weight: 500;
+            font-weight: bold; /* Century Gothic looks better bold for titles */
             color: #263238; /* Darker title color */
             border-bottom: 1px solid #eceff1;
             padding-bottom: 15px;
@@ -47,7 +67,7 @@
             border-bottom: none;
         }
         .collection-item .title {
-            font-weight: 500;
+            font-weight: bold;
             color: #424242;
         }
         .collection-item p {
@@ -72,7 +92,7 @@
             padding-bottom: 10px;
         }
         .department-card h5 {
-            font-weight: 500;
+            font-weight: bold;
             color: #673ab7; /* Deep Purple */
             margin-bottom: 10px;
         }
@@ -148,7 +168,7 @@
             margin-top: 0;
             margin-bottom: 20px;
             color: #2c3e50;
-            font-weight: 500;
+            font-weight: bold; /* Century Gothic looks better bold for titles */
         }
         #modalRequiredToolsList li {
             margin-bottom: 5px;
@@ -158,66 +178,73 @@
             margin-right: 8px;
             color: #4CAF50; /* Green checkmark */
         }
+        #modalRequiredToolsList li .tool-description {
+            font-size: 0.9em;
+            color: #757575;
+            margin-left: 5px;
+        }
 
-        /* --- REFINED STYLES FOR OPTIONAL TOOLS LIST IN MODAL --- */
+        /* --- REFINED STYLES FOR OPTIONAL TOOLS LIST IN MODAL (Alignment Fix) --- */
         #modalToolsList .tool-item {
             display: flex;
             align-items: flex-start; /* Align checkbox and content at the top */
             margin-bottom: 10px;
-            padding-left: 0; /* Ensure no extra padding from parent or Materialize */
+            padding-left: 0;
         }
         #modalToolsList .tool-item label {
-            display: flex; /* Make the label itself a flex container */
-            align-items: flex-start; /* Align checkbox and its text content at the top */
-            width: 100%; /* Ensure label takes full width for flex alignment */
-            cursor: default; /* Make it clear that disabled checkboxes are not clickable via label */
+            display: flex;
+            align-items: flex-start;
+            width: 100%;
+            cursor: default;
         }
         /* Adjust Materialize checkbox margin to align with text top */
         #modalToolsList .tool-item label > input[type="checkbox"] {
             margin-top: 10px; /* Aligns checkbox with the top of the name */
             margin-right: 15px; /* Space between checkbox and text */
-            position: relative; /* Needed for z-index to ensure it's clickable */
-            z-index: 1; /* Ensure checkbox is above any background */
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
         }
         /* Style for the visual part of the Materialize checkbox */
         #modalToolsList .tool-item label > span {
             display: flex;
-            flex-direction: column; /* Stack name/badge and description vertically */
-            flex-grow: 1; /* Allow it to take available space */
-            line-height: normal; /* Reset line-height to normal for better text wrapping */
+            flex-direction: column;
+            flex-grow: 1;
+            line-height: normal;
             padding-top: 8px; /* Adjust padding to vertically align content with checkbox */
         }
         #modalToolsList .tool-item .tool-name-and-badge {
             display: flex;
-            justify-content: space-between; /* Push name to left, badge to right */
-            align-items: center; /* Vertically align name and badge */
-            width: 100%; /* Take full width of the content area */
-            margin-bottom: 3px; /* Small space between name/badge and description */
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 3px;
         }
         #modalToolsList .tool-item .tool-name-text {
-            font-weight: bold;
-            color: #424242; /* Darker text for tool name */
-            line-height: 1.2; /* Tighter line height for the name */
+            font-weight: bold; /* Make tool names bold */
+            color: #424242;
+            line-height: 1.2;
+            flex-grow: 1; /* Allow name to take available space */
         }
         #modalToolsList .tool-item .tool-description {
             font-size: 0.85em;
             color: #757575;
-            line-height: 1.4; /* Slightly more space for description */
+            line-height: 1.4;
             margin-top: 0;
-            display: block; /* Ensure it takes full width below name/badge */
+            display: block;
         }
         /* Custom Badge for "From Dept" to avoid Materialize overlap */
         .custom-badge-from-dept {
-            background-color: #e53935; /* Red background */
+            background-color: #ef5350; /* Red background, consistent with logout */
             color: white;
             padding: 3px 6px;
             border-radius: 3px;
             font-size: 0.7em;
             font-weight: bold;
             margin-left: 10px; /* Space between tool name and badge */
-            white-space: nowrap; /* Prevent the text from wrapping */
-            flex-shrink: 0; /* Prevent it from shrinking */
-            line-height: 1; /* Ensure the badge height is minimal */
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1;
         }
         /* Disable visual effects for disabled checkboxes */
         #modalToolsList .tool-item input[type="checkbox"][disabled] + span:not(.lever):before,
@@ -238,56 +265,54 @@
             background-color: #f5f5f5;
             border-top: 1px solid #e0e0e0;
             text-align: right;
-            display: flex; /* Use flexbox for buttons */
-            justify-content: flex-end; /* Push buttons to the right */
-            gap: 10px; /* Space between buttons */
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         /* Checklist specific styles */
         .checklist-item-card {
-            margin-bottom: 15px; /* Increased margin for better separation */
-            padding: 15px; /* Increased padding */
+            margin-bottom: 15px;
+            padding: 15px;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
             background-color: #fcfcfc;
         }
         .checklist-item-card h6 {
             margin-top: 0;
-            margin-bottom: 8px; /* Increased margin below title */
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: bold; /* Make checklist item titles bold */
             color: #333;
         }
-        .checklist-item-card p.description { /* Added a class for the description paragraph */
-            margin-bottom: 15px; /* Space between description and input fields */
+        .checklist-item-card p.description {
+            margin-bottom: 15px;
             font-size: 0.9em;
             color: #757575;
         }
         .checklist-item-card .input-field {
             margin-top: 0;
-            margin-bottom: 0; /* Remove default input-field bottom margin */
+            margin-bottom: 0;
         }
         .checklist-item-card .input-field label {
-            top: 0.8rem; /* Adjust label position */
+            top: 0.8rem;
         }
         .checklist-item-card .input-field select {
-            /* Keep browser-default for simplicity with dynamic content,
-               or uncomment M.FormSelect.init in JS if you want full Materialize styling */
             display: block;
             width: 100%;
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: #fff;
-            height: 3rem; /* Standard Materialize input height */
+            height: 3rem;
         }
         .checklist-item-card textarea.materialize-textarea {
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            height: auto; /* Allow auto-resizing */
+            height: auto;
             min-height: 45px;
-            line-height: 1.5; /* Ensure text spacing is good */
-            overflow-y: auto; /* Allow scroll if content is long */
+            line-height: 1.5;
+            overflow-y: auto;
         }
         /* Style for disabled select/textarea */
         .checklist-item-card select:disabled,
@@ -300,6 +325,78 @@
             transform: translateY(-14px) scale(0.8);
             transform-origin: 0 0;
         }
+
+        /* Custom style for the Logout button form container */
+        .logout-form {
+            display: inline-block; /* Allows the form to sit nicely in the navbar li */
+            margin-left: 15px; /* Space from other navbar items */
+        }
+        .logout-form button {
+            background-color: #ef5350 !important; /* Materialize Red accent-2 */
+            padding: 0 15px; /* Adjust padding for button look */
+            height: 36px; /* Standard button height */
+            line-height: 36px; /* Center text vertically */
+            border-radius: 4px; /* Slightly rounded corners */
+            border: none; /* Remove default button border */
+            cursor: pointer; /* Indicate it's clickable */
+            display: flex; /* Use flex to align icon and text */
+            align-items: center; /* Vertically center icon and text */
+            justify-content: center; /* Horizontally center icon and text */
+            color: white; /* Text color */
+            font-weight: bold; /* Make text bold */
+            text-transform: uppercase; /* Match Materialize button style */
+            font-family: 'Century Gothic', sans-serif; /* Ensure Century Gothic for button text */
+            letter-spacing: 0.5px;
+        }
+        .logout-form button:hover {
+            background-color: #d32f2f !important; /* Darker red on hover */
+        }
+        .logout-form button i {
+            margin-right: 8px; /* Space between icon and text */
+            font-size: 1.2em; /* Slightly larger icon */
+        }
+
+        /* --- Mobile Responsiveness for Navbar & Logout Button --- */
+        @media only screen and (max-width: 992px) {
+            nav .brand-logo {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            nav .sidenav-trigger {
+                display: block; /* Show hamburger icon */
+            }
+            .sidenav {
+                background-color: #673ab7; /* Deep Purple background for sidenav */
+            }
+            .sidenav li > a {
+                color: #fff; /* White text for sidenav links */
+                font-weight: bold;
+                padding: 0 32px; /* Add some padding */
+            }
+            .sidenav li > a:hover {
+                background-color: #5e35b1; /* Darker purple on hover */
+            }
+            .sidenav .user-view {
+                padding: 32px 32px 0;
+                margin-bottom: 20px;
+            }
+            .sidenav .user-view .name, .sidenav .user-view .email {
+                font-weight: bold;
+                color: white;
+            }
+            /* Style for the logout button form in the sidenav */
+            .sidenav .logout-form-sidenav {
+                margin: 20px 32px; /* Center the button, add vertical space */
+                width: calc(100% - 64px); /* Full width minus horizontal margin */
+                text-align: center;
+            }
+            .sidenav .logout-form-sidenav button {
+                width: 100%; /* Make the button inside the form full width */
+                font-size: 1.1em; /* Slightly larger text for mobile button */
+                padding: 10px 15px; /* More padding for a larger touch target */
+                height: auto; /* Allow height to adjust to padding */
+            }
+        }
     </style>
 </head>
 <body>
@@ -307,18 +404,45 @@
         <nav class="deep-purple darken-1">
             <div class="nav-wrapper container">
                 <a href="#" class="brand-logo">System Prep Dashboard</a>
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li><a href="#machines"><i class="material-icons left">desktop_windows</i> Machines</a></li>
                     <li><a href="#departments"><i class="material-icons left">business</i> Departments</a></li>
-                    </ul>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="waves-effect waves-light btn btn-small">
+                                <i class="material-icons left">power_settings_new</i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </nav>
     </div>
 
+    <ul class="sidenav" id="mobile-demo">
+        <li><div class="user-view">
+            <div class="background" style="background: linear-gradient(135deg, #8e24aa, #5e35b1);">
+                </div>
+            <a href="#user"><img class="circle" src="https://via.placeholder.com/64/000000/FFFFFF?text=AD"></a> <a href="#name"><span class="white-text name">Admin User</span></a> <a href="#email"><span class="white-text email">admin@yourdomain.com</span></a> </div></li>
+        <li><a href="#machines"><i class="material-icons">desktop_windows</i> Machines</a></li>
+        <li><a href="#departments"><i class="material-icons">business</i> Departments</a></li>
+        <li><div class="divider"></div></li>
+        <li>
+            <form method="post" action="{% url 'logout' %}" class="logout-form-sidenav">
+                {% csrf_token %}
+                <button type="submit" class="waves-effect waves-light btn btn-large">
+                    <i class="material-icons left">power_settings_new</i> Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+
     <div class="container">
         <div class="row">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
-                <p class="right-align grey-text text-darken-1">
+                <p class="right-align grey-text text-darken-1" style="font-size: 0.9em;">
                     <i class="material-icons tiny">access_time</i> Last updated: {{ current_time|date:"F j, Y, H:i:s" }}
                 </p>
             </div>
@@ -334,13 +458,14 @@
                         <a href="{% url 'download_agent_exe' %}" class="waves-effect waves-light btn deep-purple darken-1">
                             <i class="material-icons left">file_download</i> Download Agent Script
                         </a>
-                        <p class="grey-text text-darken-1" style="margin-top: 15px;">
+                        <p class="grey-text text-darken-1" style="margin-top: 15px; font-size: 0.9em;">
                             * Remember to replace `API_KEY` in the downloaded script with your actual API Key for each machine for better security and management.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="row" id="machines">
             <div class="col s12">
                 <div class="card">
@@ -501,6 +626,10 @@
             // Materialize Auto Initialization for components
             M.AutoInit();
 
+            // Initialize Sidenav
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems);
+
             // Function to get CSRF token from cookies
             function getCookie(name) {
                 let cookieValue = null;
@@ -530,7 +659,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': csrftoken,
+                            'X-CSRFToken': csrftoken, // CSRF token for department assignment
                         },
                         body: JSON.stringify({ department_id: selectedDepartmentId })
                     })
@@ -651,7 +780,7 @@
                         modalToolsList.innerHTML = '<p class="grey-text">No optional tools available in the system.</p>';
                     }
 
-                    // NEW: Populate Checklist Statuses
+                    // Populate Checklist Statuses
                     modalChecklistStatus.innerHTML = '';
                     if (allChecklistItems.length > 0) {
                         allChecklistItems.forEach(item => {
@@ -663,9 +792,7 @@
                             div.classList.add('checklist-item-card');
                             div.dataset.checklistItemId = item.id;
 
-                            // Determine if this item should be disabled (e.g., if department-mandated)
-                            // For now, let's assume all are editable unless specified otherwise
-                            const isChecklistDisabled = false; // Implement logic here if certain checklist items should be read-only
+                            const isChecklistDisabled = false;
 
                             let statusOptionsHtml = '';
                             CHECKLIST_STATUS_CHOICES.forEach(choice => {
@@ -675,23 +802,23 @@
                             div.innerHTML = `
                                 <h6>${item.name} ${item.is_critical ? '<span class="new badge red" data-badge-caption="Critical"></span>' : ''}</h6>
                                 <p class="description">${item.description || 'No description.'}</p>
-                                <div class="row"> <div class="input-field col s12 m6"> <select class="browser-default checklist-status-select" data-checklist-item-id="${item.id}" ${isChecklistDisabled ? 'disabled' : ''}>
+                                <div class="row">
+                                    <div class="input-field col s12 m6">
+                                        <select class="browser-default checklist-status-select" data-checklist-item-id="${item.id}" ${isChecklistDisabled ? 'disabled' : ''}>
                                             ${statusOptionsHtml}
                                         </select>
                                         <label class="active">Status</label>
                                     </div>
-                                    <div class="input-field col s12 m6"> <textarea id="notes_item_${item.id}" class="materialize-textarea checklist-notes" data-checklist-item-id="${item.id}" ${isChecklistDisabled ? 'disabled' : ''}>${notesValue}</textarea>
+                                    <div class="input-field col s12 m6">
+                                        <textarea id="notes_item_${item.id}" class="materialize-textarea checklist-notes" data-checklist-item-id="${item.id}" ${isChecklistDisabled ? 'disabled' : ''}>${notesValue}</textarea>
                                         <label for="notes_item_${item.id}">Notes</label>
                                     </div>
                                 </div>
                             `;
                             modalChecklistStatus.appendChild(div);
 
-                            // You might need to re-initialize Materialize components if they aren't 'browser-default'
-                            // For selects that are not browser-default:
-                            // M.FormSelect.init(div.querySelector('.checklist-status-select'));
-                            // For textareas with auto-resize:
-                            // M.textareaAutoResize(div.querySelector('.checklist-notes'));
+                            // Trigger Materialize textarea auto-resize if needed
+                            M.textareaAutoResize(div.querySelector('.checklist-notes'));
                         });
                     } else {
                         modalChecklistStatus.innerHTML = '<p class="grey-text">No checklist items defined in the system.</p>';
@@ -735,11 +862,9 @@
                     console.error('Error updating optional tools:', error);
                     M.toast({html: `Error: ${error.message || 'Failed to update optional tools.'}`, classes: 'red darken-1'});
                 });
-
-                // Do NOT close modal here, let it be closed after both saves or by user
             });
 
-            // NEW: Handle Save Checklist Statuses button click
+            // Handle Save Checklist Statuses button click
             saveChecklistStatusBtn.addEventListener('click', function() {
                 if (!currentMachineId) return;
 
@@ -749,14 +874,11 @@
                     const statusSelect = itemCard.querySelector('.checklist-status-select');
                     const notesTextarea = itemCard.querySelector('.checklist-notes');
 
-                    // Only include if not disabled, or if it's disabled but we still want to save its current (disabled) state
-                    // For now, we'll save all if the card is present
-                    const status = statusSelect.value;
-                    const notes = notesTextarea.value;
+                    const notes = notesTextarea.value || "";
 
                     checklistUpdates.push({
                         checklist_item_id: checklistItemId,
-                        status: status,
+                        status: statusSelect.value,
                         notes: notes
                     });
                 });
@@ -774,7 +896,8 @@
                 .then(response => {
                     if (!response.ok) {
                         return response.json().then(err => {
-                            throw new Error(err.message || `HTTP error! Status: ${response.status}`);
+                            console.error('Django Error Response:', err);
+                            throw new Error(err.detail || JSON.stringify(err) || `HTTP error! Status: ${response.status}`);
                         });
                     }
                     return response.json();
@@ -789,7 +912,7 @@
                     M.toast({html: `Error: ${error.message || 'Failed to update checklist statuses.'}`, classes: 'red darken-1'});
                 });
 
-                M.Modal.getInstance(machineDetailsModal).close(); // Close modal after saving
+                M.Modal.getInstance(machineDetailsModal).close();
             });
 
         });
