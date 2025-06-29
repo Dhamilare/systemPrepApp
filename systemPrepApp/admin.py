@@ -66,10 +66,9 @@ class MachineChecklistStatusAdmin(admin.ModelAdmin):
     raw_id_fields = ('machine', 'checklist_item') # For better performance if you have many instances
 
 
-# If you are using MachineToolStatus for granular tool tracking, register it:
-# @admin.register(MachineToolStatus)
-# class MachineToolStatusAdmin(admin.ModelAdmin):
-#     list_display = ('machine', 'tool', 'status', 'last_checked')
-#     list_filter = ('status', 'tool', 'machine')
-#     search_fields = ('machine__hostname', 'tool__name')
-#     raw_id_fields = ('machine', 'tool')
+@admin.register(AgentInstallationReport)
+class AgentInstallationReportAdmin(admin.ModelAdmin):
+    list_display = ('machine', 'status', 'reported_at')
+    list_filter = ('status', 'reported_at')
+    search_fields = ('machine__hostname', )
+    ordering = ('-reported_at', )
