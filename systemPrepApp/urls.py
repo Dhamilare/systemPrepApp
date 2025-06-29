@@ -18,4 +18,6 @@ urlpatterns = [
     path('departments/', DepartmentsListView.as_view(), name='departments_list'),
     path('checklist-items/', ChecklistItemsListView.as_view(), name='checklist_items_list'),
     path('machine/<int:pk>/', MachineDetailView.as_view(), name='machine_detail'),
+    path('agent/completed/', AgentInstallationCompletedView.as_view(), name='agent_installation_completed'),
+
 ]

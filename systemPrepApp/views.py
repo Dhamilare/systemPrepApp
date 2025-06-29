@@ -224,3 +224,36 @@ class MachineDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+# Agent reports installation completion
+class AgentInstallationCompletedView(APIView):
+    permission_classes = [HasAPIKey | IsAuthenticated]
+
+    def post(self, request):
+        hostname = request.data.get("hostname")
+        ip_address = request.data.get("ip_address")
+        installed = request.data.get("installed", [])
+        status_text = request.data.get("status", "completed")
+
+        if not hostname:
+            return Response({"detail": "Missing hostname"}, status=400)
+
+        try:
+            machine = Machine.objects.get(hostname=hostname)
+        except Machine.DoesNotExist:
+            return Response({"detail": "Machine not found"}, status=404)
+
+        AgentInstallationReport.objects.create(
+            machine=machine,
+            status=status_text,
+            installed_tools=installed
+        )
+
+        machine.overall_status = 'READY'
+        machine.save(update_fields=["overall_status"])
+
+        return Response({
+            "message": "Installation completion report recorded.",
+            "machine": machine.hostname,
+            "status": machine.overall_status
+        }, status=201)

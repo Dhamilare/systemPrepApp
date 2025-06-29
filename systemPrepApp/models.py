@@ -146,26 +146,30 @@ class Machine(models.Model):
             self.overall_status = 'PENDING'
         self.save()
 
-    # Override save method to capture assignment_date when department is set for the first time
     def save(self, *args, **kwargs):
-        # Check if department is being assigned or changed from None to a value
-        # and if assignment_date is not already set.
-        if self.department and not self.assignment_date and not self._state.adding:
-            # If the instance already exists in the DB, fetch its current state
-            # to compare the department field.
+        is_new_assignment = False
+        if self.pk:
+            # Fetch original record to detect department change
             try:
-                original_instance = Machine.objects.get(pk=self.pk)
-                if original_instance.department is None and self.department is not None:
-                    self.assignment_date = timezone.now()
+                original = Machine.objects.get(pk=self.pk)
+                if original.department is None and self.department is not None:
+                    is_new_assignment = True
             except Machine.DoesNotExist:
-                # This case handles a newly created instance that also gets a department assigned
-                # in the same save operation.
-                if self.department is not None:
-                    self.assignment_date = timezone.now()
-        elif self._state.adding and self.department: # For new machines created with a department
-             self.assignment_date = timezone.now()
+                pass
+        elif self.department:
+            is_new_assignment = True
+
+        # Set assignment date
+        if is_new_assignment and not self.assignment_date:
+            self.assignment_date = timezone.now()
 
         super().save(*args, **kwargs)
+
+        # 🔥 Automatically assign department's tools to this machine
+        if is_new_assignment:
+            if self.department:
+                self.optional_tools.set(self.department.productivity_tools.all())
+
 
 class MachineChecklistStatus(models.Model):
     """
@@ -202,12 +206,22 @@ class MachineToolStatus(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     tool = models.ForeignKey(ProductivityTool, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=TOOL_STATUS_CHOICES, default='PENDING')
-    last_checked = models.DateTimeField(auto_now_add=True) # Or auto_now=True if it updates on every check
+    last_checked = models.DateTimeField(auto_now_add=True) 
 
     class Meta:
-        unique_together = ('machine', 'tool') # A machine can only have one status per tool
+        unique_together = ('machine', 'tool')
         verbose_name = "Machine Tool Status"
         verbose_name_plural = "Machine Tool Statuses"
 
     def __str__(self):
         return f"{self.machine.hostname} - {self.tool.name}: {self.get_status_display()}"
+    
+
+class AgentInstallationReport(models.Model):
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE, related_name='install_reports')
+    status = models.CharField(max_length=50, default='completed')
+    installed_tools = models.JSONField(default=list, blank=True)
+    reported_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.machine.hostname} - {self.status} at {self.reported_at.strftime('%Y-%m-%d %H:%M')}"
