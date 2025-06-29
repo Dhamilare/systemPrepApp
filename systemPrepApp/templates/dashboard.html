@@ -1,10 +1,9 @@
-{% extends "base.html" %} {# This tells Django to use base.html as the parent template #}
-{% load static %} {# Keep this if you have static files used directly in dashboard.html #}
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Machines - System Prep Dashboard{% endblock %} {# Set a specific title for this page #}
+{% block title %}Machines - System Prep Dashboard{% endblock %}
 
 {% block extra_head %}
-    {# Any CSS or meta tags specific to the dashboard page can go here #}
     <style>
         /* Optional: Custom styling for the select dropdowns if browser-default isn't enough */
         .select-wrapper {

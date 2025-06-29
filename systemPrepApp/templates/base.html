@@ -62,37 +62,50 @@
 
         {# Onboarding Instructions Modal #}
         <div id="onboardInstructionsModal" class="modal">
-            <div class="modal-content">
-                <h4>Onboarding Device Instructions</h4>
-                <p>Follow these steps to onboard a new machine to the System Prep Dashboard:</p>
-                <ol>
-                    <li>
-                        <strong>Download the Onboarding Agent:</strong> The executable file (`onboarding_agent.exe`) is provided below.
-                    </li>
-                    <li>
-                        <strong>Transfer the File:</strong> Copy the downloaded `onboarding_agent.exe` file to the machine you wish to onboard. You can use a USB drive, network share, or any other preferred method.
-                    </li>
-                    <li>
-                        <strong>Run the Agent:</strong> On the target machine, simply **double-click** the `onboarding_agent.exe` file.
-                        <br>
-                        <em>Note:</em> You may see a Windows SmartScreen or antivirus warning. You will need to allow the application to run.
-                    </li>
-                    <li>
-                        <strong>Verification:</strong> Once the agent runs, it will collect basic system information and send it to the System Prep Dashboard. The machine should then appear in the "Machines Overview" table shortly.
-                    </li>
-                    <li>
-                        <strong>Initial Setup:</strong> After the machine appears, you can assign its department, add optional tools, and track its preparation status directly from the dashboard.
-                    </li>
-                </ol>
-                <a href="{% url 'download_agent_exe' %}" class="waves-effect waves-light btn blue darken-1 tooltipped" data-position="bottom" data-tooltip="Download the executable file to onboard devices">
-                    <i class="material-icons left">file_download</i> Download Agent
-                </a>
-                <p class="grey-text" style="margin-top: 15px;">For any issues, please contact IT support.</p>
-            </div>
-            <div class="modal-footer">
-                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
-            </div>
-        </div>
+    <div class="modal-content">
+        <h4>Onboarding Device Instructions</h4>
+        <p>Follow these steps to onboard a new machine into the System Prep Dashboard:</p>
+        <ol>
+            <li>
+                <strong>Download the Onboarding Agent:</strong>
+                Click the button below to download the executable file <code>client_agent.exe</code>.
+            </li>
+            <li>
+                <strong>Transfer the File:</strong>
+                Move the <code>client_agent.exe</code> file to the target machine via USB, network share, or another method.
+            </li>
+            <li>
+                <strong>Run the Agent (Initial Check-in):</strong>
+                On the target machine, double-click the agent executable. It will collect basic system details and register the machine with the dashboard.
+                <br>
+                <em>Note:</em> You may see a Windows SmartScreen or antivirus warning — allow the app to run.
+            </li>
+            <li>
+                <strong>Assign Department:</strong>
+                After the machine appears in the dashboard, you must assign it to a department from the dashboard UI before proceeding.
+            </li>
+            <li>
+                <strong>Re-run the Agent:</strong>
+                Once the department is assigned, re-run the agent on the machine. It will now fetch its assigned tasks, install required and optional tools, and report completion status.
+            </li>
+            <li>
+                <strong>Track Progress:</strong>
+                Use the dashboard to monitor tool installations, checklist statuses, and overall onboarding progress.
+            </li>
+        </ol>
+        <a href="{% url 'download_agent_exe' %}" class="waves-effect waves-light btn blue darken-1 tooltipped"
+           data-position="bottom" data-tooltip="Download the executable file to onboard devices">
+            <i class="material-icons left">file_download</i> Download Agent
+        </a>
+        <p class="grey-text" style="margin-top: 15px;">
+            For any issues or assistance, please contact your IT administrator.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+</div>
+
 
     </main>
 

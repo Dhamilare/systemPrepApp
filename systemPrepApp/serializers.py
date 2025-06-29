@@ -3,7 +3,6 @@ from .models import *
 
 # --------------------------
 # 1. Core Serializers (Dependencies first)
-# These must be defined before any other serializers that use them.
 # --------------------------
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -12,60 +11,47 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
 
 class ProductivityToolSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = ProductivityTool 
         fields = ['id', 'name', 'description', 'optional']
 
 class AgentToolSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Tool model specifically for the Agent API.
-    Assumes 'download_link' and 'version' fields exist on the Tool model.
-    If not, you will need to add them to core/models.py or remove from here.
-    """
     class Meta:
         model = ProductivityTool
         fields = ['id', 'name', 'description', 'download_link', 'version']
 
 class ChecklistItemSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the ChecklistItem model.
-    """
     class Meta:
         model = ChecklistItem
         fields = ['id', 'name', 'description', 'order', 'is_critical']
 
-
 # --------------------------
 # 2. Machine Serializers
-# These can now correctly reference DepartmentSerializer and ToolSerializer.
 # --------------------------
 
 class MachineSerializer(serializers.ModelSerializer):
-    """
-    Main serializer for the Machine model, including nested department and optional tools.
-    """
-    department = DepartmentSerializer(read_only=True) # Nested serializer for department info
+    department = DepartmentSerializer(read_only=True)
     department_id = serializers.PrimaryKeyRelatedField(
-        queryset=Department.objects.all(), source='department', write_only=True, required=False, allow_null=True
+        queryset=Department.objects.all(),
+        source='department',
+        write_only=True,
+        required=False,
+        allow_null=True
     )
-    optional_tools = ProductivityToolSerializer(many=True, read_only=True) 
+    optional_tools = ProductivityToolSerializer(many=True, read_only=True)
     overall_status_display = serializers.CharField(source='get_overall_status_display', read_only=True)
 
     class Meta:
         model = Machine
         fields = [
-            'id', 'hostname', 'ip_address', 'api_key', 'last_check_in',
-            'department', 'department_id', 'optional_tools', 'overall_status',
-            'overall_status_display', 'is_lead', 'assigned_user', 'assignment_date'
+            'id', 'hostname', 'ip_address', 'os', 'cpu', 'ram', 'mac_address',
+            'department', 'department_id', 'optional_tools',
+            'overall_status', 'overall_status_display',
+            'is_lead', 'assigned_user', 'assignment_date'
         ]
-        read_only_fields = ['id', 'api_key', 'last_check_in', 'overall_status', 'overall_status_display']
-
+        read_only_fields = ['id', 'overall_status', 'overall_status_display']
 
 class MachineDepartmentUpdateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for updating only the department of a Machine.
-    """
     department_id = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(), source='department', write_only=True
     )
@@ -80,11 +66,7 @@ class MachineDepartmentUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
 class MachineOptionalToolsSerializer(serializers.ModelSerializer):
-    """
-    Serializer for updating optional tools assigned to a Machine.
-    """
     optional_tool_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=ProductivityTool.objects.filter(optional=True),
@@ -106,15 +88,11 @@ class MachineOptionalToolsSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
 # --------------------------
 # 3. Checklist Status Serializers
 # --------------------------
 
 class ChecklistStatusSerializer(serializers.Serializer):
-    """
-    Basic serializer for a single checklist item status, used in bulk updates.
-    """
     checklist_item_id = serializers.IntegerField()
     status = serializers.ChoiceField(choices=CHECKLIST_STATUS_CHOICES)
     notes = serializers.CharField(allow_blank=True, required=False)
@@ -124,17 +102,12 @@ class ChecklistStatusSerializer(serializers.Serializer):
             raise serializers.ValidationError("Checklist item not found.")
         return value
 
-
 class MachineChecklistStatusSerializer(serializers.ModelSerializer):
-    """
-    Serializer for MachineChecklistStatus, includes detailed checklist item info.
-    """
     checklist_item_id = serializers.PrimaryKeyRelatedField(
         queryset=ChecklistItem.objects.all(), source='checklist_item', write_only=True
     )
     checklist_item_name = serializers.CharField(source='checklist_item.name', read_only=True)
     checklist_item_description = serializers.CharField(source='checklist_item.description', read_only=True)
-    # Assuming 'order' field exists on ChecklistItem model. If not, remove this line or add the field.
     checklist_item_order = serializers.IntegerField(source='checklist_item.order', read_only=True)
 
     class Meta:
@@ -157,9 +130,6 @@ class MachineChecklistStatusSerializer(serializers.ModelSerializer):
 # --------------------------
 
 class MachineChecklistStatusBulkUpdateSerializer(serializers.Serializer):
-    """
-    Serializer for bulk updating multiple MachineChecklistStatus records.
-    """
     checklist_statuses = ChecklistStatusSerializer(many=True)
 
     def create(self, validated_data):
@@ -181,15 +151,11 @@ class MachineChecklistStatusBulkUpdateSerializer(serializers.Serializer):
             updated_statuses.append(obj)
         return updated_statuses
 
-
 # --------------------------
 # 5. Agent API Serializers
 # --------------------------
 
 class AgentMachineTasksSerializer(serializers.ModelSerializer):
-    """
-    Serializer to provide machine-specific tasks and checklist status to the agent.
-    """
     required_tools = serializers.SerializerMethodField()
     optional_tools_assigned = AgentToolSerializer(source='optional_tools', many=True, read_only=True)
     checklist_items_status = serializers.SerializerMethodField()
@@ -203,20 +169,15 @@ class AgentMachineTasksSerializer(serializers.ModelSerializer):
 
     def get_required_tools(self, obj):
         if obj.department:
-            # Assuming 'productivity_tools' is the ManyToManyField name on the Department model
-            # and 'optional=False' indicates required tools.
             required = obj.department.productivity_tools.filter(optional=False)
             return AgentToolSerializer(required, many=True).data
         return []
 
     def get_checklist_items_status(self, obj):
-        # Assuming 'order' field exists on ChecklistItem model
         all_items = ChecklistItem.objects.all().order_by('order')
-        # Use the default reverse accessor 'machinecheckliststatus_set'
         machine_statuses = {
-            s.checklist_item_id: s.status for s in obj.machinecheckliststatus_set.all()
+            s.checklist_item_id: s.status for s in obj.checklist_statuses.all()
         }
-
         return [
             {
                 'id': item.id,
@@ -228,3 +189,42 @@ class AgentMachineTasksSerializer(serializers.ModelSerializer):
             }
             for item in all_items
         ]
+
+# --------------------------
+# 6. Agent Installation Report Serializer
+# --------------------------
+
+class AgentInstallationReportSerializer(serializers.Serializer):
+    machine_id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=[('completed', 'Completed'), ('failed', 'Failed')])
+    installed_tools = serializers.ListField(
+        child=serializers.IntegerField(), allow_empty=True
+    )
+
+    def create(self, validated_data):
+        machine_id = validated_data.get("machine_id")
+        status = validated_data.get("status")
+        tool_ids = validated_data.get("installed_tools", [])
+
+        machine = Machine.objects.get(id=machine_id)
+
+        AgentInstallationReport.objects.create(
+            machine=machine,
+            status=status
+        )
+
+        for tool_id in tool_ids:
+            tool = ProductivityTool.objects.get(id=tool_id)
+            MachineToolStatus.objects.update_or_create(
+                machine=machine,
+                tool=tool,
+                defaults={"status": "COMPLETED"}
+            )
+
+        return {"message": "Installation reported successfully"}
+    
+class InstallationReportSerializer(serializers.Serializer):
+    machine_id = serializers.IntegerField()
+    status = serializers.CharField(default="completed")
+    installed_tools = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+

@@ -19,5 +19,7 @@ urlpatterns = [
     path('checklist-items/', ChecklistItemsListView.as_view(), name='checklist_items_list'),
     path('machine/<int:pk>/', MachineDetailView.as_view(), name='machine_detail'),
     path('agent/completed/', AgentInstallationCompletedView.as_view(), name='agent_installation_completed'),
+    path('agent/report_installation/', AgentInstallationReportView.as_view(), name='agent_report_installation'),
+    path('agent/lookup/', AgentMachineLookupView.as_view(), name='agent-lookup'),
 
 ]

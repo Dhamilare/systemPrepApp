@@ -3,22 +3,24 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.conf import settings
 from wsgiref.util import FileWrapper
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 import os
+
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_api_key.permissions import HasAPIKey
-from django.db.models import Prefetch
-from .models import *
-from .serializers import *
 from rest_framework.decorators import api_view
+
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-# Frontend Dashboard View
+from .models import *
+from .serializers import *
+
+
 class DashboardView(LoginRequiredMixin, ListView):
     model = Machine
     template_name = 'dashboard.html'
@@ -29,17 +31,15 @@ class DashboardView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
         context['departments'] = Department.objects.prefetch_related(
             Prefetch('productivity_tools', queryset=ProductivityTool.objects.order_by('name'))
         ).order_by('name')
-
         context['all_productivity_tools'] = ProductivityTool.objects.all().order_by('name')
         context['all_checklist_items'] = ChecklistItem.objects.all().order_by('name')
-        context['current_time'] = timezone.now() 
-
+        context['current_time'] = timezone.now()
         return context
-    
+
+
 @api_view(['POST'])
 def assign_department(request, machine_id):
     machine = get_object_or_404(Machine, id=machine_id)
@@ -51,24 +51,17 @@ def assign_department(request, machine_id):
                 {"detail": "This machine is already assigned to a department and cannot be reassigned."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-    # Resolve the new department object
-    if new_department_id:
-        department = get_object_or_404(Department, id=new_department_id)
-    else:
-        department = None
 
+    department = get_object_or_404(Department, id=new_department_id) if new_department_id else None
     machine.department = department
     machine.save()
-
     return Response(MachineSerializer(machine).data, status=status.HTTP_200_OK)
 
 
-# Agent API: Register/Check-in
 class AgentRegisterCheckinView(APIView):
     permission_classes = [HasAPIKey | IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = MachineSerializer(data=request.data)
         if serializer.is_valid():
             machine = serializer.save()
@@ -85,7 +78,6 @@ class AgentRegisterCheckinView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Assign Department to Machine
 class MachineAssignDepartmentView(APIView):
     permission_classes = [HasAPIKey | IsAuthenticated]
 
@@ -103,14 +95,12 @@ class MachineAssignDepartmentView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# List Optional Tools (For UI Dropdown)
 class OptionalProductivityToolListView(generics.ListAPIView):
     queryset = ProductivityTool.objects.filter(optional=True).order_by('name')
     serializer_class = ProductivityToolSerializer
     permission_classes = [HasAPIKey | IsAuthenticated]
 
 
-# Assign Optional Tools to a Machine
 class MachineOptionalToolsView(APIView):
     permission_classes = [HasAPIKey | IsAuthenticated]
 
@@ -128,33 +118,24 @@ class MachineOptionalToolsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# List All Checklist Items (for UI)
 class AllChecklistItemsListView(generics.ListAPIView):
     queryset = ChecklistItem.objects.all().order_by('order', 'name')
     serializer_class = ChecklistItemSerializer
     permission_classes = [HasAPIKey | IsAuthenticated]
 
 
-# Bulk Checklist Status Update (Admin or Agent)
 class MachineChecklistStatusView(APIView):
-    """
-    API endpoint to bulk update checklist statuses for a specific machine.
-    """
     permission_classes = [HasAPIKey | IsAuthenticated]
 
     def post(self, request, pk, *args, **kwargs):
-        # Get machine instance by primary key (ID)
         machine = get_object_or_404(Machine, pk=pk)
-
-        # Initialize the bulk serializer with machine context
         serializer = MachineChecklistStatusBulkUpdateSerializer(
             data=request.data,
             context={'machine': machine}
         )
 
-        # Validate and save the bulk checklist status updates
         if serializer.is_valid():
-            updated_statuses = serializer.save()  # Calls `create()` method in the serializer
+            updated_statuses = serializer.save()
             return Response({
                 "message": "Checklist statuses updated successfully.",
                 "updated_checklist_items": MachineChecklistStatusSerializer(updated_statuses, many=True).data
@@ -163,7 +144,6 @@ class MachineChecklistStatusView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Agent Tasks Fetch (Tools + Checklist)
 class AgentMachineTasksView(generics.RetrieveAPIView):
     serializer_class = AgentMachineTasksSerializer
     permission_classes = [HasAPIKey]
@@ -172,10 +152,9 @@ class AgentMachineTasksView(generics.RetrieveAPIView):
         hostname = self.request.META.get('HTTP_X_HOSTNAME')
         if hostname:
             return get_object_or_404(Machine, hostname=hostname)
-        return get_object_or_404(Machine, pk=self.kwargs['pk'])  # fallback for testing
+        return get_object_or_404(Machine, pk=self.kwargs['pk'])
 
 
-#Download Agent EXE
 @login_required
 def download_agent_exe(request):
     exe_path = os.path.join(settings.BASE_DIR, 'systemPrepApp', 'dist', 'client_agent.exe')
@@ -184,76 +163,101 @@ def download_agent_exe(request):
         response = HttpResponse(wrapper, content_type='application/octet-stream')
         response['Content-Disposition'] = 'attachment; filename="client_agent.exe"'
         return response
-
     return HttpResponse("Agent executable not found.", status=404)
 
 
 class DepartmentsListView(LoginRequiredMixin, ListView):
     model = Department
-    template_name = 'departments_list.html' 
+    template_name = 'departments_list.html'
     context_object_name = 'departments'
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-
-        queryset = queryset.annotate(
+        return super().get_queryset().annotate(
             machines_count=Count('machines', distinct=True)
-        )
-
-        queryset = queryset.prefetch_related('productivity_tools')
-
-        return queryset
+        ).prefetch_related('productivity_tools')
 
 
 class ChecklistItemsListView(LoginRequiredMixin, ListView):
     model = ChecklistItem
     template_name = 'checklist_items_list.html'
     context_object_name = 'checklist_items'
-    paginate_by = 10 
+    paginate_by = 10
 
-    def get_queryset(self):
-        return super().get_queryset()
-    
 
 class MachineDetailView(LoginRequiredMixin, DetailView):
-    model = Machine 
-    template_name = 'machine_detail.html' 
+    model = Machine
+    template_name = 'machine_detail.html'
     context_object_name = 'machine'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
-# Agent reports installation completion
 class AgentInstallationCompletedView(APIView):
-    permission_classes = [HasAPIKey | IsAuthenticated]
+    permission_classes = [HasAPIKey]
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
+        serializer = InstallationReportSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        data = serializer.validated_data
+        machine_id = data["machine_id"]
+        status_value = data.get("status", "completed")
+        installed_tools = data["installed_tools"]
+
+        try:
+            machine = Machine.objects.get(id=machine_id)
+        except Machine.DoesNotExist:
+            return Response({"detail": "Machine not found."}, status=404)
+
+        AgentInstallationReport.objects.create(
+            machine=machine,
+            status=status_value,
+            installed_tools=installed_tools
+        )
+
+        return Response({"message": "Installation report received."}, status=200)
+
+
+class AgentInstallationReportView(APIView):
+    permission_classes = [HasAPIKey]
+
+    def post(self, request, *args, **kwargs):
         hostname = request.data.get("hostname")
-        ip_address = request.data.get("ip_address")
-        installed = request.data.get("installed", [])
-        status_text = request.data.get("status", "completed")
+        status_value = request.data.get("status", "completed")
+        installed_tools = request.data.get("installed_tools", [])
 
         if not hostname:
-            return Response({"detail": "Missing hostname"}, status=400)
+            return Response({"error": "Hostname is required."}, status=400)
 
         try:
             machine = Machine.objects.get(hostname=hostname)
         except Machine.DoesNotExist:
-            return Response({"detail": "Machine not found"}, status=404)
+            return Response({"error": "Machine not found."}, status=404)
 
         AgentInstallationReport.objects.create(
             machine=machine,
-            status=status_text,
-            installed_tools=installed
+            status=status_value,
+            installed_tools=installed_tools,
         )
 
-        machine.overall_status = 'READY'
-        machine.save(update_fields=["overall_status"])
+        return Response({"message": "Installation report received."}, status=status.HTTP_200_OK)
 
-        return Response({
-            "message": "Installation completion report recorded.",
-            "machine": machine.hostname,
-            "status": machine.overall_status
-        }, status=201)
+
+class AgentMachineLookupView(APIView):
+    permission_classes = [HasAPIKey]
+
+    def get(self, request, *args, **kwargs):
+        hostname = request.query_params.get('hostname')
+        if not hostname:
+            return Response({"error": "Hostname is required."}, status=400)
+
+        try:
+            machine = Machine.objects.get(hostname=hostname)
+            return Response({
+                "id": machine.id,
+                "hostname": machine.hostname,
+                "overall_status": machine.overall_status,
+                "department": machine.department.name if machine.department else None
+            })
+        except Machine.DoesNotExist:
+            return Response({"error": "Machine not found."}, status=404)

@@ -86,9 +86,10 @@ class ChecklistItem(models.Model):
         return self.name
 
 class Machine(models.Model):
-    """
-    Represents a single machine/workstation being prepared.
-    """
+    os = models.CharField(max_length=255, null=True, blank=True)  
+    cpu = models.CharField(max_length=255, null=True, blank=True)
+    ram = models.CharField(max_length=255, null=True, blank=True)
+    mac_address = models.CharField(max_length=255, null=True, blank=True)
     hostname = models.CharField(max_length=255, unique=True, help_text="Network hostname of the machine.")
     ip_address = models.GenericIPAddressField(null=True, blank=True, help_text="IP address of the machine (optional).")
     overall_status = models.CharField(
@@ -172,28 +173,18 @@ class Machine(models.Model):
 
 
 class MachineChecklistStatus(models.Model):
-    """
-    Intermediate model to track the status of each ChecklistItem for a specific Machine.
-    """
-    machine = models.ForeignKey(Machine, on_delete=models.CASCADE, related_name='checklist_statuses')
-    checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE, related_name='machine_statuses')
-    status = models.CharField(
-        max_length=20,
-        choices=CHECKLIST_STATUS_CHOICES,
-        default='PENDING',
-        help_text="Current status of this checklist item for the machine."
+    machine = models.ForeignKey(
+        Machine,
+        on_delete=models.CASCADE,
+        related_name="checklist_statuses"
     )
-    notes = models.TextField(blank=True, help_text="Any notes related to this item's status.")
+    checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=CHECKLIST_STATUS_CHOICES, default='PENDING')
+    notes = models.TextField(blank=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('machine', 'checklist_item') # A machine can only have one status per item
-        verbose_name = "Machine Checklist Status"
-        verbose_name_plural = "Machine Checklist Statuses"
-        ordering = ['checklist_item__order'] # Order by the checklist item's defined order
-
     def __str__(self):
-        return f"{self.machine.hostname} - {self.checklist_item.name}: {self.get_status_display()}"
+        return f"{self.machine.hostname} - {self.checklist_item.name} - {self.status}"
 
 
 class MachineToolStatus(models.Model):
@@ -206,7 +197,7 @@ class MachineToolStatus(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     tool = models.ForeignKey(ProductivityTool, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=TOOL_STATUS_CHOICES, default='PENDING')
-    last_checked = models.DateTimeField(auto_now_add=True) 
+    last_checked = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('machine', 'tool')
